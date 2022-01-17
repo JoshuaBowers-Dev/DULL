@@ -1,0 +1,10 @@
+C:\Users\joshu\Desktop\GitHub\DULL\bin\Debug\DULL.exe.config
+C:\Users\joshu\Desktop\GitHub\DULL\bin\Debug\DULL.exe
+C:\Users\joshu\Desktop\GitHub\DULL\bin\Debug\DULL.pdb
+C:\Users\joshu\Desktop\GitHub\DULL\obj\Debug\DULL.Form.resources
+C:\Users\joshu\Desktop\GitHub\DULL\obj\Debug\DULL.Properties.Resources.resources
+C:\Users\joshu\Desktop\GitHub\DULL\obj\Debug\DULL.csproj.GenerateResource.cache
+C:\Users\joshu\Desktop\GitHub\DULL\obj\Debug\DULL.csproj.CoreCompileInputs.cache
+C:\Users\joshu\Desktop\GitHub\DULL\obj\Debug\DULL.exe
+C:\Users\joshu\Desktop\GitHub\DULL\obj\Debug\DULL.pdb
+C:\Users\joshu\Desktop\GitHub\DULL\obj\Debug\DULL.csproj.AssemblyReference.cache
