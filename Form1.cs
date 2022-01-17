@@ -56,12 +56,12 @@ namespace DULL
         {
             byte[] byteData = client.EndReceive(result, ref endpoint);
             string data = Encoding.UTF8.GetString(byteData);
-            this.Invoke(new MethodInvoker(async delegate //MUST DO ALL THREADING TASKS WITHIN HERE
+            this.Invoke(new MethodInvoker(delegate //MUST DO ALL THREADING TASKS WITHIN HERE
             {
                 lbl_debug.Text = data;
                 if (isLogging)
                 {
-                    await File.WriteAllLinesAsync("WriteLines.txt", data); //  Write to file
+                    File.AppendAllText("PortData.txt", data); //  Write to file
                 }
             }));
             client.BeginReceive(new AsyncCallback(Listen), null);   //  Execute the listener again
