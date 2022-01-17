@@ -17,7 +17,7 @@ namespace DULL
     {
         private IPEndPoint endpoint;
         UdpClient client = new UdpClient();
-        private bool isStarted = false;
+        private bool isListening = false;
         private bool isLogging = false;
         public Form()
         {
@@ -31,40 +31,61 @@ namespace DULL
 
         private void btn_startstop_Click(object sender, EventArgs e)
         {
+            disableControls();   // Disable all inputs
             try
             {
-                disableControls();   // Disable all inputs
-                var port = ((int)nud_port.Value);
-                IPEndPoint endpoint = (rb_anyip.Checked) ? new IPEndPoint(IPAddress.Any, port) : new IPEndPoint(IPAddress.Parse(tb_ipaddress.Text), port);  //  Get IP (listen to all IP's or specific)
-                client.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
-                client.Client.Bind(endpoint);
-                client.EnableBroadcast = true;
-                client.BeginReceive(new AsyncCallback(Listen), null);   // Open UDP session
-
-                btn_startstop.BackColor = Color.Red;
-                btn_startstop.Text = "Stop";
-                //btn_startstop.Enabled = true;
+                if (!isListening)   //  If not currently running...
+                {
+                    buildListener();    //  Builds the UDP-Listener and starts the session
+                    btn_startstop.BackColor = Color.Red;
+                    btn_startstop.Text = "Stop";
+                    isListening = true;
+                }
+                else   //  If currently running...
+                {
+                    btn_startstop.BackColor = Color.Green;
+                    btn_startstop.Text = "Start";
+                    isListening = false;
+                }
             }
             catch (Exception ex)
             {
-                enableControls();
                 lbl_debug.Text = ex.Message;
             }
+            enableControls();
         }
+
+        private void buildListener()
+        {
+            client = new UdpClient();
+            var port = (int) nud_port.Value;
+            IPEndPoint endpoint = (rb_anyip.Checked) ?
+                new IPEndPoint(IPAddress.Any, port) :
+                new IPEndPoint(IPAddress.Parse(tb_ipaddress.Text), port);  //  Get IP (listen to all IP's or specific)
+            client.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+            client.Client.Bind(endpoint);
+            client.EnableBroadcast = true;
+            client.BeginReceive(new AsyncCallback(Listen), null);   // Open UDP session
+        }
+
 
         private void Listen(IAsyncResult result)
         {
-            byte[] byteData = client.EndReceive(result, ref endpoint);
-            string data = Encoding.UTF8.GetString(byteData);
-            this.Invoke(new MethodInvoker(delegate //MUST DO ALL THREADING TASKS WITHIN HERE
+            if (isListening)
             {
-                lbl_debug.Text = data;
-                if (isLogging)
+                byte[] byteData = client.EndReceive(result, ref endpoint);
+                string data = Encoding.UTF8.GetString(byteData);
+                this.Invoke(new MethodInvoker(delegate //MUST DO ALL THREADING TASKS WITHIN HERE
                 {
-                    File.AppendAllText("PortData.txt", data); //  Write to file
-                }
-            }));
-            client.BeginReceive(new AsyncCallback(Listen), null);   //  Execute the listener again
+                    lbl_debug.Text = data;
+                    if (isLogging)
+                    {
+                        var port = (int)nud_port.Value;
+                        File.AppendAllText(port + "_PortData.txt", data + "\n"); //  Write to file
+                    }
+                }));
+                client.BeginReceive(new AsyncCallback(Listen), null);   //  Execute the listener again
+            }
         }
 
         private void disableControls()
@@ -75,9 +96,9 @@ namespace DULL
 
         private void enableControls()
         {
-            Control[] controls = { btn_startstop, tb_ipaddress, nud_port, rb_anyip, rb_specificip };
+            Control[] controls = (isListening) ? new Control[]{ btn_startstop } : new Control[] { btn_startstop, tb_ipaddress, nud_port, rb_anyip, rb_specificip };
             foreach (Control c in controls) c.Enabled = true;
-            if (rb_anyip.Checked) tb_ipaddress.Enabled = false;
+            if (rb_anyip.Checked && controls.Length > 1) tb_ipaddress.Enabled = false;
         }
 
         private void btn_toggleLog_Click(object sender, EventArgs e)
